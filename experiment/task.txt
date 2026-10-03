@@ -1,0 +1,11 @@
+Audit the small Node project under `experiment/fixture` (relative to your working directory).
+
+Do this and then stop:
+
+1. Read every `.js` file under `experiment/fixture/lib` and `experiment/fixture/src`.
+2. Find every logic bug in that code. A bug is a place where the code does not do what
+   its own name, its callers, or its surrounding comments say it does.
+3. Prove each bug by running a short `node -e "..."` command that prints wrong output.
+   Do not modify any file under `experiment/fixture` — read and run only.
+4. In your final reply, list each bug as: file, function, one-line cause, and the exact
+   command output that proves it. End with the total number of bugs found.

@@ -5,7 +5,7 @@
 真正生效的文件仍是宿主 profile 目录 `C:\Users\rain\.dsh\profiles\desktop\` 下的那几个；
 这里的是它的副本、生成器、验证脚本与说明文档。
 
-仓库根目录布局：`README.md` + `profile/`（宿主文件副本）+ `tools/`（生成器与校验脚本）+ `analysis/`（测量脚本）+ `docs/`（说明文档）。
+仓库根目录布局：`README.md` + `profile/`（宿主文件副本）+ `tools/`（生成器与校验脚本）+ `analysis/`（测量脚本）+ `experiment/`（A/B 实验）+ `docs/`（说明文档）。
 
 ## 这个预设是什么
 
@@ -24,7 +24,7 @@
 | 路径 | 对应宿主/原位置 | 说明 |
 | --- | --- | --- |
 | `profile/shell-fallback.mjs` | `C:\Users\rain\.dsh\profiles\desktop\shell-fallback.mjs` | 门控插件本体（11,191 B）。`tools.restrict({deny:['pwsh']})` + 失败计数 + 单向解除 |
-| `profile/live-cordis.patch.yml` | `C:\Users\rain\.dsh\profiles\desktop\cordis.patch.yml` | **当前生效**的完整 profile patch（34,467 B，690 行；已去除 fast-dsh 残留）。`:433` 起是 `- insert:` 预设声明块，`:434` 是 `preset-bash-first`；`:518` 是 preset 内部 `shell-fallback` 成员行 |
+| `profile/live-cordis.patch.yml` | `C:\Users\rain\.dsh\profiles\desktop\cordis.patch.yml` | **当前生效**的完整 profile patch（34,379 B，690 行；已去除 fast-dsh 残留）。`:92` 与 `:433` 是两处 `- insert:`，`:434` 是 `preset-bash-first`；`:518` 是 preset 内部 `shell-fallback` 成员行 |
 | `profile/cordis.patch.yml.bak-before-bash-first` | 同名前缀文件 | 追加 bash-first 之前的备份（22,219 B），**回滚用** |
 | `profile/cordis.patch.yml.bak-before-cordis-caps` | 同名前缀文件 | 并入创造模式能力之前的备份（35,011 B） |
 | `tools/gen-bash-first-preset.mjs` | 本目录 | 从 live patch 幂等重生成预设块（切片而非重打，`!!js`/折行/缩进无法手抄） |
@@ -37,6 +37,7 @@
 | `tools/gen-preset-standard-override.mjs` | 本目录 | 生成 `preset-standard` 覆盖块的原始脚本 |
 | `tools/verify-profile-patch.mjs` | 本目录 | profile patch 结构校验 |
 | `analysis/` | 本目录 | 当初量出「该不该做 bash-first」的分析脚本（shell 失败率 / 失败成因 / 耗时去向），只读会话记录；见 `analysis/README.md` |
+| `experiment/` | 本目录 | 「压缩推理预算提示词能否省推理」的 A/B 实验：两臂插件、固定被试任务、统计脚本与原始数据。**结论为阴性**；见 `experiment/README.md` |
 | `docs/bash-first-预设说明.md` | `C:\Users\rain\Documents\deepseek-harness\默认工作区\` | 安装/机制细节说明（踩坑、验证记录） |
 
 ## 重新生成并写回（PowerShell）
