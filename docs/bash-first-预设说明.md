@@ -68,13 +68,13 @@ powershell 作为备用手段（如 bash 命令调用失败若干次后）」*�
 | 文件 | 作用 |
 | --- | --- |
 | `C:\Users\rain\.dsh\profiles\desktop\shell-fallback.mjs` | 门控插件本体（256 行） |
-| `C:\Users\rain\.dsh\profiles\desktop\cordis.patch.yml:453` | `preset-bash-first` 声明块（250 行） |
-| `C:\Users\rain\.dsh\profiles\desktop\cordis.patch.yml:536` | `shell-fallback` 成员行（**在 preset 的 `plugins` 内部**） |
-| `E:\fast-dsh\tools\gen-bash-first-preset.mjs` | 从 live patch 重新生成预设块（幂等） |
-| `E:\fast-dsh\tools\splice-bash-first.mjs` | 把生成块写回 live patch（只替换末尾那段 `- insert:`） |
-| `E:\fast-dsh\tools\verify-bash-first-compose.mjs` | 离线复核组合结果 |
-| `E:\fast-dsh\tools\test-shell-fallback.mjs` | 门控单测（36 项） |
-| `E:\fast-dsh\work\check-live.mjs` | 用真实分层重放 live 组合 |
+| `C:\Users\rain\.dsh\profiles\desktop\cordis.patch.yml:434` | `preset-bash-first` 声明块（250 行） |
+| `C:\Users\rain\.dsh\profiles\desktop\cordis.patch.yml:518` | `shell-fallback` 成员行（**在 preset 的 `plugins` 内部**） |
+| `<workspace>\fast-mode-preset\tools\gen-bash-first-preset.mjs` | 从 live patch 重新生成预设块（幂等） |
+| `<workspace>\fast-mode-preset\tools\splice-bash-first.mjs` | 把生成块写回 live patch（只替换末尾那段 `- insert:`） |
+| `<workspace>\fast-mode-preset\tools\verify-bash-first-compose.mjs` | 离线复核组合结果 |
+| `<workspace>\fast-mode-preset\tools\test-shell-fallback.mjs` | 门控单测（36 项） |
+| `<workspace>\fast-mode-preset\tools\check-live.mjs` | 用真实分层重放 live 组合 |
 
 **门控行必须在 preset 自己的 `plugins` 里，不能在 profile 顶层。** profile 顶层行会连
 `standard` 预设一起命中 —— standard 同样同时暴露 bash 与 pwsh（Windows 上是一次性

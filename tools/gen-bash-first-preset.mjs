@@ -8,7 +8,7 @@
 // indentation. Slicing the live text is exact; retyping it is not.
 //
 // INDENTATION: the profile's `preset-standard` override is the shipped insert
-// form dedented by 4 (see E:\fast-dsh\tools\gen-preset-standard-override.mjs,
+// form dedented by 4 (see ./gen-preset-standard-override.mjs in this directory,
 // which did `dedent4`). We re-indent the finished block by 4 to put it back
 // under a top-level `- insert:` list. All edits below happen in the dedented
 // coordinate system.
@@ -80,7 +80,7 @@ block.splice(
   header + 1,
   0,
   '    name: 快速模式',
-  '    description: Bash only; PowerShell unlocks after repeated bash failures.',
+  '    description: 只使用 Bash；连续失败后才解锁 PowerShell。',
 )
 
 const orderLine = block.findIndex((line) => line === '    order: 1')
@@ -254,7 +254,7 @@ const banner = `# --------------------------------------------------------------
 # PRESET: bash-first — bash is the ONLY shell callable until it fails.
 #
 # GENERATED — regenerate with:
-#   node E:\\fast-dsh\\tools\\gen-bash-first-preset.mjs \\
+#   node <workspace>\\fast-mode-preset\\tools\\gen-bash-first-preset.mjs \\
 #     C:\\Users\\rain\\.dsh\\profiles\\desktop\\cordis.patch.yml <out>
 # It is derived from the 'preset-standard' override above, so change anything
 # shared by both presets THERE and regenerate.
