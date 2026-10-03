@@ -36,7 +36,6 @@
 | `tools/bash-truncation-safety.mjs` | 本目录 | 静默/大输出截断安全性验证 |
 | `tools/gen-preset-standard-override.mjs` | 本目录 | 生成 `preset-standard` 覆盖块的原始脚本 |
 | `tools/verify-profile-patch.mjs` | 本目录 | profile patch 结构校验 |
-| `docs/快速模式-预设描述.md` | 本目录新增 | **面向使用者的中文描述**：解决什么问题、行为、「失败」判据、能力面、用法与撤销 |
 | `docs/bash-first-预设说明.md` | `C:\Users\rain\Documents\deepseek-harness\默认工作区\` | 安装/机制细节说明（踩坑、验证记录） |
 
 ## 重新生成并写回（PowerShell）
