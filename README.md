@@ -5,7 +5,7 @@
 真正生效的文件仍是宿主 profile 目录 `C:\Users\rain\.dsh\profiles\desktop\` 下的那几个；
 这里的是它的副本、生成器、验证脚本与说明文档。
 
-仓库根目录布局：`README.md` + `profile/`（宿主文件副本）+ `tools/`（生成器与校验脚本）+ `analysis/`（测量脚本）+ `experiment/`（A/B 实验）+ `docs/`（说明文档）。
+仓库根目录布局：`README.md` + `profile/`（宿主文件副本 + `history/` 历史备份）+ `tools/`（生成器与校验脚本）+ `analysis/`（测量脚本）+ `experiment/`（A/B 实验）+ `docs/`（说明文档）。
 
 ## 这个预设是什么
 
@@ -33,11 +33,12 @@
 | 路径 | 对应宿主/原位置 | 说明 |
 | --- | --- | --- |
 | `profile/shell-fallback.mjs` | `C:\Users\rain\.dsh\profiles\desktop\shell-fallback.mjs` | 门控插件本体（11,191 B）。`tools.restrict({deny:['pwsh']})` + 失败计数 + 单向解除 |
-| `profile/live-cordis.patch.yml` | `C:\Users\rain\.dsh\profiles\desktop\cordis.patch.yml` | **当前生效**的完整 profile patch（35,332 B，702 行；已去除 fast-dsh 残留，并已删除 `reasoning-budget` 行）。`:436` 是**唯一**的 `- insert:`，`:437` 是 `preset-bash-first`；`:520` 是 preset 内部 `shell-fallback` 成员行；`:648` 是 `tool-presentation`（`mode: both`）；`:658` 是顶层 `agent-preset-registry`；`:89-100` 是已删 `reasoning-budget` 行的留痕注释（含恢复用的注释块） |
+| `profile/live-cordis.patch.yml` | `C:\Users\rain\.dsh\profiles\desktop\cordis.patch.yml` | **当前生效**的完整 profile patch（35,410 B，702 行；已去除 fast-dsh 残留，并已删除 `reasoning-budget` 行）。`:436` 是**唯一**的 `- insert:`，`:437` 是 `preset-bash-first`；`:520` 是 preset 内部 `shell-fallback` 成员行；`:648` 是 `tool-presentation`（`mode: both`）；`:658` 是顶层 `agent-preset-registry`；`:89-100` 是已删 `reasoning-budget` 行的留痕注释（含恢复用的注释块） |
 | `profile/cordis.patch.yml.bak-before-ptc-both` | 同名前缀文件 | 装上 PTC（`mode: both`）之前的备份（34,379 B，690 行），**回滚用** |
 | `profile/cordis.patch.yml.bak-before-rb-removal` | 同名前缀文件 | 删除全局 `reasoning-budget` 行之前的备份（35,002 B，699 行），**回滚用** |
 | `profile/cordis.patch.yml.bak-before-bash-first` | 同名前缀文件 | 追加 bash-first 之前的备份（22,219 B），**回滚用** |
 | `profile/cordis.patch.yml.bak-before-cordis-caps` | 同名前缀文件 | 并入创造模式能力之前的备份（35,011 B） |
+| `profile/history/` | `C:\Users\rain\.dsh\profiles\desktop\` 下已删除的备份 | 宿主 profile 目录里 9 个历史备份的归档（`cordis.patch.yml.bak-t4` / `before-persistent-pwsh` / `before-idle-tuning` / `before-bash-default` / `before-path-reword` / `before-desc-cn` / `before-fastdsh-purge` / `package.json.bak-extensionfail` / `pnpm-workspace.yaml.bak`）。逐字节副本，仍可回滚；见 `profile/history/README.md` |
 | `tools/gen-bash-first-preset.mjs` | 本目录 | 从 live patch 幂等重生成预设块（切片而非重打，`!!js`/折行/缩进无法手抄）。步骤 3b 并入创造模式三项，步骤 3c 插入 `tool-presentation`（`mode: both`） |
 | `tools/splice-bash-first.mjs` | 本目录 | 把生成块写回 live patch，**只替换末尾那段 `- insert:`**，并原样搬运其后的顶层 `agent-preset-registry` 行 |
 | `tools/verify-bash-first-compose.mjs` | 本目录 | 离线复核组合结果（门控 5 项 + 创造模式能力 + PTC 呈现行，共 20 项断言） |
@@ -47,7 +48,7 @@
 | `tools/bash-truncation-safety.mjs` | 本目录 | 静默/大输出截断安全性验证 |
 | `tools/gen-preset-standard-override.mjs` | 本目录 | 生成 `preset-standard` 覆盖块的原始脚本 |
 | `tools/verify-profile-patch.mjs` | 本目录 | profile patch 结构校验 |
-| `analysis/` | 本目录 | 当初量出「该不该做 bash-first」的分析脚本（shell 失败率 / 失败成因 / 耗时去向），只读会话记录；见 `analysis/README.md` |
+| `analysis/` | 本目录 | 当初量出「该不该做 bash-first」的分析脚本（shell 失败率 / 失败成因 / 耗时去向 / 两把 shell 谁更常被自己写错），只读会话记录；见 `analysis/README.md` |
 | `experiment/` | 本目录 | 「压缩推理预算提示词能否省推理」的 A/B 实验：两臂插件、固定被试任务、统计脚本与原始数据。**结论为阴性**；见 `experiment/README.md` |
 | `docs/bash-first-预设说明.md` | `C:\Users\rain\Documents\deepseek-harness\默认工作区\` | 安装/机制细节说明（踩坑、验证记录） |
 
@@ -120,4 +121,12 @@ node verify-bash-first-compose.mjs $env:TEMP\bf.yml
 - **2026-10-03 fast-dsh 清除**：`live-cordis.patch.yml` 已同步为去除 fast-dsh 残留后的版本
   （原 41 行 "INERT DOCUMENTATION ONLY" 注释块被精简，4 处注释里的 `E:\fast-dsh\tools\...`
   路径改写为 `<repo>\tools\...`）；解析出的 YAML 结构与清除前**完全一致**，
-  预设与 `selectedDefault: bash-first` 未受影响。原始版本见 `C:\Users\rain\.dsh\profiles\desktop\cordis.patch.yml.bak-before-fastdsh-purge`。
+  预设与 `selectedDefault: bash-first` 未受影响。原始版本见 `profile/history/cordis.patch.yml.bak-before-fastdsh-purge`。
+- **2026-10-03 宿主目录瘦身**：宿主 `C:\Users\rain\.dsh\profiles\desktop\` 里曾堆了 13 个 `*.bak*`
+  （10 个 `cordis.patch.yml.bak-*` + `package.json.bak-extensionfail` + `pnpm-workspace.yaml.bak`
+  + `cordis.patch.yml.bak-t4`），现全部移入本仓库——4 个在 `profile/` 下、9 个在 `profile/history/` 下，
+  均为逐字节副本（`cmp` / md5 已校验）。**宿主目录现在只剩 `cordis.patch.yml` 一个 patch 文件**；
+  同时宿主 `cordis.patch.yml:182` 的 `REVERT to PowerShell` 注释已改写为指向 `profile/history/` 里的文件，
+  以免指向不存在的路径。
+- `analysis/` 里的 `mistype-*.py` 三个脚本是回答「两把 shell 谁更常被模型自己写错」时为定稿口径补写的，
+  见 `analysis/README.md` 的定稿口径小节。

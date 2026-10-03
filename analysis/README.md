@@ -13,6 +13,9 @@
 | `shell-grammar-report.py` | 互斥分类版：grammar（**shell 本身拒绝**了模型的命令语法）vs runtime（命令合法且跑起来了，世界说不）。特别排除「程序只是打印了像错误的东西」这类假阳性 |
 | `shell-grammar-final.py` | 定稿版量法：self-inflicted 失败必须是 **shell 自己的抱怨**，即模式要出现在 `[stderr]` 区域，或（无该标记时）落在退出码非零的记录里。**这是最终采用的判定标准** |
 | `step-timing.py` | 一步的墙上时间花在哪、prompt 缓存命中多少。`stream[0].time` = 请求开始、`stream[-1].time` = 响应结束，`usage` 里的 `cacheReadTokens` 给前缀缓存命中率 |
+| `mistype-strict.py` | 严格版「模型把命令写错了吗」判定：只计 **shell 自己抱怨命令文本畸形**（bad substitution / unexpected EOF / ParserError …），并显式**排除**「程序只是打印了像错误的东西」这类假阳性。逐条 dump 命中样本供人眼复核 |
+| `mistype-conditional.py` | 在严格版之上加**条件比较**：把「命令里嵌了内联程序（`node -e` / `python -c` / `perl -e` / `pwsh -c`）或带引号路径」这一构造成本更高的子集单独拆出来算，检验两把 shell 的失败率是否只是被试难度不同造成的 |
+| `mistype-final.py` | **定稿量法**，把两种失败刻意分开：**A. shell-grammar**（命令没 parse 就被 shell 拒绝，= 用户说的「输错命令」；要求 shell 的抱怨出现在 `[stderr]` 区域，或（无该标记时）落在退出码非零的记录里）与 **B. program-bug**（命令解析没问题，是模型嵌在里面的程序有 bug）。按 shell、按会话、并给 leave-one-session-out 视图，防止单个大会话把率扛起来 |
 
 ## 结论（作为快速模式立项依据的那三组数）
 
@@ -20,6 +23,13 @@
   但 bash 那 4 次按 stderr 判定**全是假阳性**（一个审计脚本本身在打印捕获到的 PowerShell 错误文本），
   所以 bash 的真实自伤率 ≈ **0%**。
 - **归因到模型自己写错**：pwsh 36 次 = **2.5%**、bash 2 次 = **0.7%**。
+- **定稿口径（`mistype-final.py`，扩到全部会话后重跑）**：只看 **A. shell-grammar**（命令没 parse 就被
+  shell 拒绝），pwsh **17/1437 = 1.18%** vs bash **12/1262 = 0.95%**；而 bash 那 12 次**全部集中在同一个
+  会话**里，leave-one-session-out 去掉它之后是 **0/554 = 0.00%**，pwsh 去掉最大会话后仍有 10/962 = 1.04%。
+  同一批数据里 **B. program-bug**（命令没写错，是内联程序有 bug）bash 172 次远多于 pwsh 31 次 —— 这是
+  「bash 里更常写 `node -e` / `python -c` 这种内联程序」的构造成本差异，不是 shell 的语法问题。
+  结论：**两者都不常输错命令；pwsh 略高的一点全部来自「把 JS/引号塞进 PowerShell 的 `-Command`」，
+  这是 PowerShell 引号规则的固有成本，不是模型手滑。**
 - **耗时**：模型生成占一步耗时的 **91.8%**（吞吐 ~237 tok/s 恒定，没有每步固定开销）；
   推理文本占输出字符的 **69.6%**、工具参数 28.2%、可见正文 2.2%；
   前缀缓存命中 **96.7%**；重复工具调用仅 3.5%。

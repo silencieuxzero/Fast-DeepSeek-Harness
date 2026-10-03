@@ -1,0 +1,97 @@
+# Your patch layer for this dsh profile, applied after every bundle layer:
+# a top-level YAML array of loader patch entries (id-targeted config
+# overrides, disables, and insert lists; `!!js` expressions allowed).
+- { id: computer-use-cua-driver-native, disabled: true }
+- id: ui-settings-general
+  name: "@deepseek-ai/dsh-client-ui-settings-general"
+  config:
+    welcomeNoticeVersion: 2026-08-13.1
+- id: agent-default-model
+  name: "@deepseek-ai/dsh-agent-default-model"
+  config:
+    provider: workbuddy
+    model: deepseek-v4.1-flash
+    reasoningEffort: high
+- id: permission
+  name: "@deepseek-ai/dsh-permission-presets"
+  config:
+    presets:
+      read-only:
+        sandbox: read-only
+        approval: ask
+      workspace-write:
+        sandbox: workspace-write
+        approval: ask
+      danger-full-access:
+        sandbox: danger-full-access
+        approval: never
+    defaultPreset: danger-full-access
+# 远程访问（cloudflared 隧道 / 远程桌面授权）插件：按用户要求禁用，永不挂载。
+# 该行由 @linxin666/dsh-web-all 的 bundle 层插入，本条用户层覆盖其后生效。
+- { id: web-ui-remote-web-ui, disabled: true }
+# 以下三行上游默认关闭（opt-in）；用户要求「其他的都安装」，故在用户层显式开启。
+- { id: web-ui-ssh, disabled: false }
+- { id: web-ui-liangshen, disabled: false }
+- { id: web-ui-skill-explorer, disabled: false }
+- id: web-ui-skin-center
+  name: "@linxin666/dsh-client-ui-skin-center"
+  config:
+    skin-custom-theme:
+      applied: false
+    skin-wallpaper:
+      enabled: false
+- id: ui-theme
+  name: "@deepseek-ai/dsh-client-ui-theme"
+  config:
+    preference: light
+- id: ui-settings-account
+  name: "@deepseek-ai/dsh-client-ui-settings-account"
+  config:
+    version: 1
+    step: done
+    purpose: development
+    process: standard
+    completion: completed
+    usage: detailed
+    developerTools: true
+- id: ui-chat
+  name: "@deepseek-ai/dsh-client-ui-chat"
+  config:
+    transcriptView: standard
+    performanceUsage: detailed
+    linkOpening: new-tab
+- id: ui-settings
+  name: "@deepseek-ai/dsh-client-ui-settings"
+  config:
+    enabled: true
+- id: web-ui-pet
+  name: "@linxin666/dsh-pet"
+  config:
+    visible: true
+    size: 160
+    right: 65
+    bottom: 88
+    petId: whale-girl-refined
+- id: web-ui-usage
+  name: "@linxin666/dsh-web-all/usage"
+  config:
+    plugin: "@linxin666/dsh-usage"
+    enabled: true
+- id: subagent
+  name: "@deepseek-ai/dsh-subagent"
+  config:
+    maxActiveSubagents: 16
+- id: agent-loop
+  name: "@deepseek-ai/dsh-agent-loop"
+  config:
+    agents: []
+    maxParallelToolCalls: 50
+# Bounds private reasoning: a system-prompt section that tells the model to stop
+# re-opening settled decisions. See reasoning-budget.mjs for the measurements behind
+# it and for the revert note (delete this row and the file).
+- insert:
+    - id: reasoning-budget
+      name: ./reasoning-budget.mjs
+      config:
+        enabled: true
+        order: 10150

@@ -1,0 +1,13 @@
+packages:
+  - .
+
+nodeLinker: hoisted
+autoInstallPeers: false
+allowBuilds:
+  cloudflared: false
+  cpu-features: false
+  ssh2: false
+minimumReleaseAgeExclude:
+  - dshmarket@1.66.6
+  - billion-context@0.1.178
+  - billion-context@0.1.179

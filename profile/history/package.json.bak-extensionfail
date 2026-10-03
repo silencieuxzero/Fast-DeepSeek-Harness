@@ -1,0 +1,33 @@
+{
+  "name": "dsh-profile-desktop",
+  "private": true,
+  "dsh": {
+    "profile": {
+      "bundles": [
+        "@deepseek-ai/dsh-base",
+        "@deepseek-ai/dsh-web-app",
+        "@linxin666/dsh-web-all",
+        "dshmarket",
+        "dsh-workbuddy-connect",
+        "billion-context",
+        "@vectorize-io/hindsight-coding-agents",
+        "@nanmicoder/dsh-agent-teams",
+        "@deepseek-ai/dsh-experimental-agent-team-profile"
+      ]
+    },
+    "desktopNextPlugins": 1,
+    "desktopNextOnboarding": {
+      "version": 1,
+      "outcome": "completed"
+    }
+  },
+  "dependencies": {
+    "@linxin666/dsh-web-all": "0.4.4",
+    "@local/fast-deepseek-harness": "link:E:/fast-dsh/plugins/fast-deepseek-harness",
+    "@nanmicoder/dsh-agent-teams": "0.1.22",
+    "@vectorize-io/hindsight-coding-agents": "0.8.0",
+    "billion-context": "0.1.180",
+    "dsh-workbuddy-connect": "0.7.1",
+    "dshmarket": "^1.66.6"
+  }
+}
