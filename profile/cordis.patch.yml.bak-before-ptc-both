@@ -86,18 +86,15 @@
   config:
     agents: []
     maxParallelToolCalls: 25
-# REMOVED 2026-10-03: the 'reasoning-budget' insert row lived here (a system-prompt
-# section telling the model to stop re-opening settled decisions). It was A/B tested
-# and had NO measurable effect on reasoning length: reasoning chars/step B/A = 0.975
-# (95% CI 0.73-1.31), marker density 1.07 (0.77-1.48), no endpoint significant. Its
-# own hard cap ("60 words per step") was exceeded 11.7x at the median step. The
-# experimental evidence is in E:\fast deepseek harness\experiment\REPORT.md; to restore
-# it, re-add the row below and restore reasoning-budget.mjs.
-#   - id: reasoning-budget
-#     name: ./reasoning-budget.mjs
-#     config:
-#       enabled: true
-#       order: 10150
+# Bounds private reasoning: a system-prompt section that tells the model to stop
+# re-opening settled decisions. See reasoning-budget.mjs for the measurements behind
+# it and for the revert note (delete this row and the file).
+- insert:
+    - id: reasoning-budget
+      name: ./reasoning-budget.mjs
+      config:
+        enabled: true
+        order: 10150
 # ---------------------------------------------------------------------------
 # Tool-surface notes. The former bundle that owned this concern has been
 # removed from this profile; every line below is a comment with no config and
@@ -522,8 +519,8 @@
             config:
               enabled: true
               threshold: 2
-              primaryTools: [bash]
-              fallbackTools: [pwsh]
+              primaryTools: [ bash ]
+              fallbackTools: [ pwsh ]
           - id: tool-fs
             name: '@deepseek-ai/dsh-tool-fs'
           - id: tool-fs-search
@@ -536,7 +533,10 @@
             name: '@deepseek-ai/dsh-skill-filesystem'
             config:
               customSkillDirs:
-                - !!js process.getBuiltinModule('node:path').join(process.getBuiltinModule('node:path').dirname(process.getBuiltinModule('node:module').createRequire(new URL('../node_modules/dsh-desktop-next/package.json', baseUrl)).resolve('@deepseek-ai/dsh-agent-preset/package.json')), 'skills')
+                - !!js process.getBuiltinModule('node:path').join(process.getBuiltinModule('node:path').dirname(process.getBuiltinModule('node:module').createRequire(new
+                  URL('../node_modules/dsh-desktop-next/package.json',
+                  baseUrl)).resolve('@deepseek-ai/dsh-agent-preset/package.json')),
+                  'skills')
           - id: tool-skill
             name: '@deepseek-ai/dsh-tool-skill'
           - id: command-goal
@@ -645,16 +645,11 @@
               searchTimeoutMs: 60000
           - id: tool-cordis
             name: '@deepseek-ai/dsh-tool-cordis'
-          - id: tool-presentation
-            name: '@deepseek-ai/dsh-agent-tool-presentation'
-            config:
-              mode: both
           - id: present
             name: '@deepseek-ai/dsh-tool-present'
           - id: tool-plugin-manager
             name: '@deepseek-ai/dsh-plugin-manager/tools'
             disabled: !!js "!ctx.get('profileContext')"
-
 - id: agent-preset-registry
   name: "@deepseek-ai/dsh-agent-preset-registry"
   config:
@@ -670,7 +665,7 @@
 # It is derived from the 'preset-standard' override above, so change anything
 # shared by both presets THERE and regenerate.
 #
-# FOUR PARTS, all required:
+# THREE HALVES, all required:
 #   1. terminal-bash/persistent-bash register the persistent tool 'bash'
 #      (Git Bash via shellPath — bare `bash` on PATH is WSL).
 #   2. terminal-pwsh/persistent-pwsh register 'pwsh', re-typed to
@@ -681,13 +676,6 @@
 #      restriction only after 2 CONSECUTIVE failed 'bash' calls. A prompt alone
 #      cannot do this — the model still sees the pwsh schema and reaches for it
 #      on the first Windows-flavoured command.
-#   4. 'tool-presentation' with mode 'both' adds PTC (programmatic tool
-#      calling): the model may also call `run_code` and drive tools from inside
-#      a program, overlapping safe calls and keeping intermediate results out
-#      of the conversation. 'both' (not 'ptc') on purpose — pure 'ptc' hides
-#      the 'bash' schema, which would contradict part 3's whole narrative.
-#      Requires a composed ctx.ptcRuntime (the 'include:ptc-runtime' row) and a
-#      registered SDK renderer; the preset is rejected at mount without them.
 #
 # The gate is a plugin row INSIDE this preset, so scope parenting confines it to
 # bash-first agents only; it cannot leak into the 'standard' preset, which also

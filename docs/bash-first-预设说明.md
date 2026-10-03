@@ -68,10 +68,10 @@ powershell 作为备用手段（如 bash 命令调用失败若干次后）」*�
 | 文件 | 作用 |
 | --- | --- |
 | `C:\Users\rain\.dsh\profiles\desktop\shell-fallback.mjs` | 门控插件本体（256 行） |
-| `C:\Users\rain\.dsh\profiles\desktop\cordis.patch.yml:434` | `preset-bash-first` 声明块（250 行） |
-| `C:\Users\rain\.dsh\profiles\desktop\cordis.patch.yml:518` | `shell-fallback` 成员行（**在 preset 的 `plugins` 内部**） |
+| `C:\Users\rain\.dsh\profiles\desktop\cordis.patch.yml:437` | `preset-bash-first` 声明块（250 行） |
+| `C:\Users\rain\.dsh\profiles\desktop\cordis.patch.yml:520` | `shell-fallback` 成员行（**在 preset 的 `plugins` 内部**） |
 | `<workspace>\fast-mode-preset\tools\gen-bash-first-preset.mjs` | 从 live patch 重新生成预设块（幂等） |
-| `<workspace>\fast-mode-preset\tools\splice-bash-first.mjs` | 把生成块写回 live patch（只替换末尾那段 `- insert:`） |
+| `<workspace>\fast-mode-preset\tools\splice-bash-first.mjs` | 把生成块写回 live patch（只替换末尾那段 `- insert:`；现只剩 `:436` 一处，但脚本仍按锚点定位） |
 | `<workspace>\fast-mode-preset\tools\verify-bash-first-compose.mjs` | 离线复核组合结果 |
 | `<workspace>\fast-mode-preset\tools\test-shell-fallback.mjs` | 门控单测（36 项） |
 | `<workspace>\fast-mode-preset\tools\check-live.mjs` | 用真实分层重放 live 组合 |
@@ -101,7 +101,7 @@ Node 按 URL 缓存 ESM，进程内改文件**不生效**；loader 的 `internal
 撤销：
 
 ```powershell
-# 1. 删掉 cordis.patch.yml 里 453 行起的整块（`- insert:` 到文件末尾的注释区之前）
+# 1. 删掉 cordis.patch.yml 里 436 行起的整块（`- insert:` 到文件末尾的注释区之前）
 #    或直接从备份恢复：
 Copy-Item C:\Users\rain\.dsh\profiles\desktop\cordis.patch.yml.bak-before-bash-first `
           C:\Users\rain\.dsh\profiles\desktop\cordis.patch.yml -Force

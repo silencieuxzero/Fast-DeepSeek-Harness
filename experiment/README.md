@@ -24,6 +24,21 @@
 | `arm-batch.mjs` | 生成批量卡计划 JSON |
 | `runs/ab.json` | 24 个实验会话的逐会话原始指标 |
 | `runs/summary.json` | 汇总 |
+| `arms/reasoning-budget.removed.mjs` | 被删掉的插件本体（75 行 / 4,268 B），留作复原素材 |
+
+## 后续（2026-10-03）：插件已按实验结论下线
+
+实验做完后，用户决定**删掉**这个插件，而不是在 A/B 两臂间选一个：
+
+- 宿主 `C:\Users\rain\.dsh\profiles\desktop\reasoning-budget.mjs` 已删除，留下本目录的
+  `arms/reasoning-budget.removed.mjs` 作为唯一副本（4,268 B，`cmp` 通过）。
+- 它的 profile patch 行（原本是第一处 `- insert:`）已换成一段 12 行留痕注释，
+  见 `profile/live-cordis.patch.yml:89-100`，注释里含恢复用的原行 4 行。
+- 删除前状态备份：`profile/cordis.patch.yml.bak-before-rb-removal`（35,002 B / 699 行）。
+- 删后新会话实测：`system/message` 里 `Reasoning budget` / `re-open` / `settled decisions`
+  全部 absent（对照旧探针 13,740 字符的 system message 里该段落位于偏移 12964）。
+- 依据就是本实验的阴性结论 —— 该段落对推理长度无任何可测效果，而它是**全局**挂载，
+  standard 与创造模式也一直在为这 827 字符付费。
 
 ## 关键操作约束（踩过的坑）
 

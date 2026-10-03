@@ -220,6 +220,66 @@ console.log('--- creation-mode capabilities folded in from the cordis preset ---
   )
 }
 
+// --- the PTC ('programmatic tool calling') presentation row -----------------
+// `tool-presentation` with `mode: both` is the one row that carries the factory
+// `ptc` preset's capability. Three things must hold, and each has bitten before:
+//   * the row exists and is the ONLY one (a second `presentAs` call for the same
+//     scope throws `tools.presentAs("...") conflicts with "..." already
+//     declared for this scope; one composition selects one presentation`);
+//   * mode is exactly `both`, not `ptc` — pure `ptc` hides the `bash` schema, so
+//     this preset's whole bash-first narrative (and shell-fallback's 10155
+//     prompt section) would describe a tool the wire never advertises;
+//   * it sits immediately BEFORE `present`, mirroring the factory ptc preset,
+//     which places it after the `tool-web`/`tool-cordis` pair.
+console.log()
+console.log('--- PTC presentation (mode both) folded in from the ptc preset ---')
+{
+  const plugins = preset?.config?.plugins ?? []
+  const rows = plugins.filter((p) => p.id === 'tool-presentation')
+
+  check(rows.length === 1, 'exactly one tool-presentation row (presentAs rejects a second declaration)')
+  check(
+    rows[0]?.name === '@deepseek-ai/dsh-agent-tool-presentation',
+    'tool-presentation names the presentation package',
+    rows[0]?.name,
+  )
+  check(
+    rows[0]?.config?.mode === 'both',
+    "tool-presentation mode is 'both' (pure 'ptc' would hide the bash schema)",
+    JSON.stringify(rows[0]?.config?.mode),
+  )
+  const orderIds = plugins.map((p) => p.id)
+  check(
+    orderIds.indexOf('tool-presentation') === orderIds.indexOf('present') - 1,
+    'tool-presentation sits immediately before present (as in the ptc preset)',
+  )
+  // The factory ptc preset disables these; this preset must NOT, since the
+  // deployment runtime is TypeScript and `workflow`'s output schema is lossless
+  // JSON (measured). Asserting it keeps a future drive-by edit from "fixing" it.
+  // NOTE: these rows are NESTED inside the subagent `cordis:group` member. A
+  // group's children are its `config` ARRAY (`group: true` + `config: [ ... ]`),
+  // not a `config.plugins` list — a top-level `plugins.find` would miss them and
+  // report a false failure.
+  const nested = []
+  const walk = (list) => {
+    for (const entry of list ?? []) {
+      if (entry === null || typeof entry !== 'object') continue
+      const children = Array.isArray(entry.config)
+        ? entry.config
+        : (entry.config?.plugins ?? [])
+      for (const child of children) nested.push(child)
+      walk(children)
+    }
+  }
+  walk(plugins)
+  const findAny = (id) => plugins.find((p) => p.id === id) ?? nested.find((p) => p.id === id)
+  for (const id of ['workflow-ptc', 'tool-workflow']) {
+    const row = findAny(id)
+    check(row !== undefined, `${id} row is present`)
+    check(row?.disabled !== true, `${id} stays enabled alongside PTC`)
+  }
+}
+
 console.log()
 if (fail.length) {
   console.log(`RESULT: ${fail.length} check(s) FAILED`)

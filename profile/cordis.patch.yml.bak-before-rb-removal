@@ -86,18 +86,15 @@
   config:
     agents: []
     maxParallelToolCalls: 25
-# REMOVED 2026-10-03: the 'reasoning-budget' insert row lived here (a system-prompt
-# section telling the model to stop re-opening settled decisions). It was A/B tested
-# and had NO measurable effect on reasoning length: reasoning chars/step B/A = 0.975
-# (95% CI 0.73-1.31), marker density 1.07 (0.77-1.48), no endpoint significant. Its
-# own hard cap ("60 words per step") was exceeded 11.7x at the median step. The
-# experimental evidence is in E:\fast deepseek harness\experiment\REPORT.md; to restore
-# it, re-add the row below and restore reasoning-budget.mjs.
-#   - id: reasoning-budget
-#     name: ./reasoning-budget.mjs
-#     config:
-#       enabled: true
-#       order: 10150
+# Bounds private reasoning: a system-prompt section that tells the model to stop
+# re-opening settled decisions. See reasoning-budget.mjs for the measurements behind
+# it and for the revert note (delete this row and the file).
+- insert:
+    - id: reasoning-budget
+      name: ./reasoning-budget.mjs
+      config:
+        enabled: true
+        order: 10150
 # ---------------------------------------------------------------------------
 # Tool-surface notes. The former bundle that owned this concern has been
 # removed from this profile; every line below is a comment with no config and
