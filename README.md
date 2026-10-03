@@ -5,7 +5,7 @@
 真正生效的文件仍是宿主 profile 目录 `C:\Users\rain\.dsh\profiles\desktop\` 下的那几个；
 这里的是它的副本、生成器、验证脚本与说明文档。
 
-仓库根目录布局：`README.md` + `profile/`（宿主文件副本）+ `tools/`（生成器与校验脚本）+ `docs/`（说明文档）。
+仓库根目录布局：`README.md` + `profile/`（宿主文件副本）+ `tools/`（生成器与校验脚本）+ `analysis/`（测量脚本）+ `docs/`（说明文档）。
 
 ## 这个预设是什么
 
@@ -36,6 +36,7 @@
 | `tools/bash-truncation-safety.mjs` | 本目录 | 静默/大输出截断安全性验证 |
 | `tools/gen-preset-standard-override.mjs` | 本目录 | 生成 `preset-standard` 覆盖块的原始脚本 |
 | `tools/verify-profile-patch.mjs` | 本目录 | profile patch 结构校验 |
+| `analysis/` | 本目录 | 当初量出「该不该做 bash-first」的分析脚本（shell 失败率 / 失败成因 / 耗时去向），只读会话记录；见 `analysis/README.md` |
 | `docs/bash-first-预设说明.md` | `C:\Users\rain\Documents\deepseek-harness\默认工作区\` | 安装/机制细节说明（踩坑、验证记录） |
 
 ## 重新生成并写回（PowerShell）
