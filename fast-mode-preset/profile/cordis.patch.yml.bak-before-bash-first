@@ -1,0 +1,451 @@
+# Your patch layer for this dsh profile, applied after every bundle layer:
+# a top-level YAML array of loader patch entries (id-targeted config
+# overrides, disables, and insert lists; `!!js` expressions allowed).
+- { id: computer-use-cua-driver-native, disabled: true }
+- id: ui-settings-general
+  name: "@deepseek-ai/dsh-client-ui-settings-general"
+  config:
+    welcomeNoticeVersion: 2026-08-13.1
+- id: agent-default-model
+  name: "@deepseek-ai/dsh-agent-default-model"
+  config:
+    provider: workbuddy
+    model: deepseek-v4.1-flash
+    reasoningEffort: high
+- id: permission
+  name: "@deepseek-ai/dsh-permission-presets"
+  config:
+    presets:
+      read-only:
+        sandbox: read-only
+        approval: ask
+      workspace-write:
+        sandbox: workspace-write
+        approval: ask
+      danger-full-access:
+        sandbox: danger-full-access
+        approval: never
+    defaultPreset: danger-full-access
+# 远程访问（cloudflared 隧道 / 远程桌面授权）插件：按用户要求禁用，永不挂载。
+# 该行由 @linxin666/dsh-web-all 的 bundle 层插入，本条用户层覆盖其后生效。
+- { id: web-ui-remote-web-ui, disabled: true }
+# 以下三行上游默认关闭（opt-in）；用户要求「其他的都安装」，故在用户层显式开启。
+- { id: web-ui-ssh, disabled: false }
+- { id: web-ui-liangshen, disabled: false }
+- { id: web-ui-skill-explorer, disabled: false }
+- id: web-ui-skin-center
+  name: "@linxin666/dsh-client-ui-skin-center"
+  config:
+    skin-custom-theme:
+      applied: false
+    skin-wallpaper:
+      enabled: false
+- id: ui-theme
+  name: "@deepseek-ai/dsh-client-ui-theme"
+  config:
+    preference: light
+- id: ui-settings-account
+  name: "@deepseek-ai/dsh-client-ui-settings-account"
+  config:
+    version: 1
+    step: done
+    purpose: development
+    process: standard
+    completion: completed
+    usage: detailed
+    developerTools: true
+- id: ui-chat
+  name: "@deepseek-ai/dsh-client-ui-chat"
+  config:
+    transcriptView: standard
+    performanceUsage: detailed
+    linkOpening: new-tab
+- id: ui-settings
+  name: "@deepseek-ai/dsh-client-ui-settings"
+  config:
+    enabled: true
+- id: web-ui-pet
+  name: "@linxin666/dsh-pet"
+  config:
+    visible: true
+    size: 160
+    right: 65
+    bottom: 88
+    petId: whale-girl-refined
+- id: web-ui-usage
+  name: "@linxin666/dsh-web-all/usage"
+  config:
+    plugin: "@linxin666/dsh-usage"
+    enabled: true
+- id: subagent
+  name: "@deepseek-ai/dsh-subagent"
+  config:
+    maxActiveSubagents: 16
+- id: agent-loop
+  name: "@deepseek-ai/dsh-agent-loop"
+  config:
+    agents: []
+    maxParallelToolCalls: 25
+# Bounds private reasoning: a system-prompt section that tells the model to stop
+# re-opening settled decisions. See reasoning-budget.mjs for the measurements behind
+# it and for the revert note (delete this row and the file).
+- insert:
+    - id: reasoning-budget
+      name: ./reasoning-budget.mjs
+      config:
+        enabled: true
+        order: 10150
+# ---------------------------------------------------------------------------
+# INERT DOCUMENTATION ONLY — every line below is a comment. It adds no rows, no
+# config and no behaviour; delete the whole block freely, nothing depends on it.
+# Evidence: node E:\fast-dsh\tools\verify-profile-patch.mjs
+#
+# Tool-surface trimming (team dsh-latency, task t4) is owned by the bundle
+# `@local/fast-deepseek-harness` (E:\fast-dsh\plugins\fast-deepseek-harness).
+# That bundle
+# installs its own patch row and prunes tools per agent at runtime through
+# `agent.ctx.tools.restrict()` — it never edits this file. Bundle patches
+# compose at boot from the profile's bundle list, so NOTHING has to be added
+# here for the plugin itself.
+#
+# DO NOT disable tool rows in this file. The bundle's `preset: safe` (shipped
+# default) already masks `hindsight_*` (8 tools / 6,495 chars) and `ssh_*`
+# (6 tools / 4,596 chars) for every new agent. Verified live: a fresh agent
+# sees 63 tools instead of the global 77, with hindsight_* = 0 and ssh_* = 0.
+# A `disabled: true` here would duplicate that, and for `web-ui-ssh` it would
+# also kill the SSH UI panel that line 33 above deliberately re-enables.
+#
+# Row ids in THIS profile (the aggregate carrier @linxin666/dsh-web-all is what
+# is installed, so its rows are namespaced `web-ui-*`):
+#   cordis.yml:1273  web-ui-task-board   -> @linxin666/dsh-web-all/task-board
+#   cordis.yml:1290  web-ui-ssh          -> @linxin666/dsh-web-all/ssh
+#   cordis.yml:1345  hindsight           -> @vectorize-io/hindsight-coding-agents/dsh
+#   cordis.yml:1347  agent-teams
+# The bare ids `ui-task-board` and `ssh` (from the standalone packages' own
+# patches) DO NOT EXIST here. Writing them is a silent no-op: zero tools
+# pruned, zero savings, no error anywhere. Do not copy them from
+# work/tool-audit.md.
+#
+# The only schema-cost lever not already taken is the task-board group
+# (8 tools / 12,694 chars ~ 3,327 tokens per request at 3.815 chars/token).
+# Prefer the bundle's one-word opt-in over disabling a row: set
+# `preset: balanced` in E:\fast-dsh\plugins\fast-deepseek-harness\cordis.patch.yml
+# (revert: set it back to `safe`, then reinstall that bundle). That reclaims
+# the same tokens per agent while keeping the GUI board alive.
+# HONEST FRAMING: tool-schema pruning buys TOKENS and COST, not proven
+# latency. The audit found no direct evidence that schema size moves ttft; the
+# extrapolated upper bound is 108-203 ms/step and counter-evidence weakens it.
+# ---------------------------------------------------------------------------
+- id: subagent-model-selection-settings
+  name: "@deepseek-ai/dsh-tool-subagent/model-selection-settings"
+  config:
+    enabled: true
+    allowedModels:
+      - provider: workbuddy
+        model: deepseek-v4.1-flash
+      - provider: workbuddy
+        model: glm-5.3-flash
+      - provider: workbuddy
+        model: minimax-m3-pay
+      - provider: workbuddy
+        model: hy4-preview-f
+      - provider: workbuddy
+        model: space-bunny
+
+# ---------------------------------------------------------------------------
+# PERSISTENT SHELL (bash by default on Windows) — replaces the shipped one-shot
+# pwsh tool with a shell that is owned by the agent and stays alive for the
+# whole conversation.
+#
+# TWO SEPARATE WINS, do not conflate them:
+#   1. PERSISTENCE. dsh-tool-pwsh starts a brand-new "pwsh -NoLogo -NoProfile
+#      -NonInteractive -Command" process for EVERY call (dsh-pwsh-local/README:
+#      "no shell state survives between calls"). That costs 640 ms of pure
+#      process startup per call here; a persistent shell measures 109 ms.
+#   2. BASH CAN SATISFY A READINESS PROBE THAT PWSH CANNOT. This is the bigger
+#      win and the reason bash is now the default: with bash the per-call cost
+#      drops to ~40-93 ms. Measured on this machine with the real promptTail
+#      accumulator: pwsh 650-900 ms/call vs Git Bash 40-93 ms/call. See TUNING
+#      below for the mechanism.
+#
+# WHY IT MUST BE 'preset-standard': the web bundle disables the HOST-level
+# tool-pwsh row (dsh-web-app/cordis.patch.yml:447-451) and moves the agent plane
+# behind agent presets. Editing dsh-base's tool-pwsh row, or the profile's, is a
+# silent no-op. There is no user-facing config field for this — the preset
+# declaration IS the switch.
+#
+# WHAT IT DOES: a Cordis patch override is keyed by loader row id, and replaces
+# the complete config. So this restates the shipped standard preset verbatim and
+# then shapes the shell members: the 'persistent-shell' group runs pty +
+# terminal-bash(shellPath: Git Bash) + dsh-tool-bash-persistent on Windows, with
+# the terminal-pwsh/persistent-pwsh pair kept in the file but 'disabled: true'.
+#
+# NOTE ON tool-bash (the row above the group, still win32-disabled): that is
+# dsh-tool-bash, whose executor hardcodes ["bash","-c",command] with NO shellPath
+# field (dsh-bash-local/lib/index.js:141-145). Enabling it on Windows would
+# silently resolve bare `bash` to WSL (/usr/bin/bash, 7-9 s on the first call),
+# because the Git installer does not put Git\bin on PATH. Only the PTY backend
+# below takes shellPath, which is why the switch is made here and not there.
+#
+# GENERATED — do not hand-edit the plugins list below.
+#   node E:\fast-dsh\tools\gen-preset-standard-override.mjs \
+#     <dsh-web-app>/presets/standard.patch.yml \
+#     <dsh-web-app>/presets/minimal.patch.yml <out>
+# The path shown in this block is the SHIPPED file; the live app.asar copy is
+# what the runtime actually composes. The shell members have been hand-edited
+# since generation (bash default) — regenerating will revert them.
+#
+# REVERT to PowerShell: restore cordis.patch.yml.bak-before-bash-default, or set
+# terminal-bash/persistent-bash back to `disabled: !!js process.platform ===
+# 'win32'` and the terminal-pwsh/persistent-pwsh pair back to `!!js
+# process.platform !== 'win32'`. Then reload the loader and start a NEW session.
+#
+# SCOPE: agent presets are activated once and shared by selecting Agents, so an
+# existing session keeps the revision it booted with. Only sessions started
+# after this edit pick up the new shell. VERIFIED on this machine: the host
+# booted 22:14:36 and the file was edited at 22:58:09, and the session still had
+# the one-shot pwsh tool (no state across calls, new PID every call).
+#
+# KNOWN LIMIT: neither dsh-tool-bash-persistent nor dsh-tool-pwsh-persistent
+# declares isConcurrencySafe, so they are exclusive (dsh-tools/lib/index.js:3057
+# fails closed). Switching to bash removes the per-call process tax but does NOT
+# recover the parallel-scheduling loss that exclusivity causes.
+#
+# TUNING (idleSilenceMs/handoffGraceMs/exactProbeAfterMs on terminal-bash):
+# dsh-terminal-bash decides a command finished by waiting for output to go
+# quiet for idleSilenceMs + handoffGraceMs (index.js:724-726). It has two fast
+# paths above that and, on Windows, exactly one of them is reachable:
+#   - stdin_read via promptTextSeen (index.js:713) requires the text right after
+#     the OSC 133;D; marker to be EXACTLY the prompt. The accumulator at
+#     index.js:646-660 uses `remaining = Math.max(0, 6 - promptTail.length)` and
+#     overflows to "dsh> \0" past 6 chars, while CONTROLLED_PROMPT is 5 chars
+#     (index.js:76) — so it needs a marker+prompt tail of exactly 5 chars.
+#     * pwsh CANNOT do this: PWSH_PROMPT_SETUP's `function prompt` (index.js:962)
+#       emits the marker and 'dsh> ' in one write, so the tail overflows.
+#     * Git Bash CAN, but only with echo off: with echo on the same chunk also
+#       carries the echoed command and overflows (38 chars measured). After
+#       `stty -echo` the marker arrives in its own 15-byte chunk ending in
+#       precisely <ESC>]133;D;0<BEL>dsh>  -> 5 chars -> promptTextSeen = true.
+#       dsh-tool-bash-persistent sends `stty -echo` when it creates the shell
+#       (lib/index.js:203-239), so the fast path is satisfied automatically.
+#   - stdin_read via exactProbeAfterMs (index.js:720) needs
+#     foreground.inputWaiting, which WindowsProcessInspector.isStdinWaiting
+#     hardcodes to false (dsh-subprocess-local/lib/runner-launch-*.js:126-128).
+#     Unreachable on Windows for either dialect.
+# So the fallback is idleSilenceMs + handoffGraceMs; the shipped default of
+# 3000 + 500 = 3500 ms per call was paid on EVERY call. Measured end-to-end
+# through a real PTY (E:\fast-dsh\tools\bash-e2e-correct.mjs):
+#   pwsh-tuned, echo on, 600 + 50 .......   40-440 ms  (noop 40 ms, 20 KB 440 ms)
+#   Git Bash, `stty -echo`, 3000 + 500 ..   77-126 ms  (shipped values suffice)
+#   Git Bash, `stty -echo`, 600 + 50 ....   78-124 ms
+# Verified NOT to truncate (E:\fast-dsh\tools\bash-truncation-safety.mjs): a
+# 1.5 s silent sleep, a 0.8 s silent sleep, an output-1.2s-silence-output
+# stutter, `seq 1 2000`, a 20 KB single line, and a no-output command all
+# returned complete under idle=3000 AND idle=100. A PREMATURE settle just costs
+# extra empty-poll round trips; the tool loop keeps waiting for its END marker
+# (dsh-tool-bash-persistent/lib/index.js:245-317), so correctness does not
+# depend on this value. handoffGraceMs must stay >= pollIntervalMs (50),
+# enforced by validateConfig (index.js:62-74).
+# ---------------------------------------------------------------------------
+- id: preset-standard
+  name: '@deepseek-ai/dsh-agent-preset'
+  config:
+    id: standard
+    order: 1
+    plugins:
+      - id: persona
+        name: '@deepseek-ai/dsh-persona'
+        config:
+          suffix: Your working directory is {{cwd}}.
+          prefix: You are a coding agent powered by the {{model}} model.
+      - id: agent-instructions
+        name: '@deepseek-ai/dsh-agent-instructions'
+        config:
+          maxBytes: 65536
+      - id: tool-bash
+        name: '@deepseek-ai/dsh-tool-bash'
+        disabled: !!js process.platform === 'win32'
+      - id: persistent-shell
+        name: cordis:group
+        group: true
+        isolate:
+          terminals: true
+        config:
+          - id: pty
+            name: '@deepseek-ai/dsh-terminal'
+          - id: terminal-bash
+            name: '@deepseek-ai/dsh-terminal-bash'
+            disabled: !!js process.platform !== 'win32'
+            config:
+              timeoutMs: 300000
+              # Git Bash, NOT the bare `bash` on PATH: that resolves to WSL
+              # (/usr/bin/bash, first call 7-9 s) and the Git installer does not
+              # add Git\bin to PATH. dsh-bash-local hardcodes ["bash","-c",...]
+              # with no shellPath, so the bash *tool* cannot be redirected this
+              # way - only this PTY backend can.
+              shellPath: !!js >-
+                process.platform === 'win32'
+                  ? 'C:\\Program Files\\Git\\bin\\bash.exe'
+                  : '/bin/bash'
+              shellArgs: ['--noprofile', '--norc', '-i']
+              idleSilenceMs: 600
+              handoffGraceMs: 50
+              exactProbeAfterMs: 150
+          - id: persistent-bash
+            name: '@deepseek-ai/dsh-tool-bash-persistent'
+            disabled: !!js process.platform !== 'win32'
+            config:
+              timeoutMs: 300000
+              description: |-
+                Run commands in a bash shell
+                * When invoking this tool, the contents of the "command" parameter does NOT need to be XML-escaped.
+                * Network access depends on the task environment. Prefer configured mirrors/proxies when they are available.
+                * State is persistent across command calls and discussions with the user.
+                * To inspect a particular line range of a file, e.g. lines 10-25, try 'sed -n 10,25p /path/to/the/file'.
+                * Please avoid commands that may produce a very large amount of output.
+                * Please run long lived commands in the background, e.g. 'sleep 10 &' or start a server in the background.
+          - id: terminal-pwsh
+            name: '@deepseek-ai/dsh-terminal-bash'
+            # Disabled: bash is the default shell on Windows now. Flip this back
+            # to `process.platform !== 'win32'` to restore PowerShell.
+            disabled: true
+            config:
+              shellDialect: pwsh
+              timeoutMs: 300000
+              idleSilenceMs: 600
+              handoffGraceMs: 50
+              exactProbeAfterMs: 150
+          - id: persistent-pwsh
+            name: '@deepseek-ai/dsh-tool-pwsh-persistent'
+            disabled: true
+            config:
+              timeoutMs: 300000
+              description: |-
+                Run commands in a PowerShell shell
+                * When invoking this tool, the contents of the "command" parameter does NOT need to be XML-escaped.
+                * You don't have access to the internet via this tool.
+                * State is persistent across command calls and discussions with the user.
+                * Use native Windows paths (C:\...) and $env:NAME variables; this is PowerShell, not bash.
+                * Please avoid commands that may produce a very large amount of output.
+                * Please run long lived commands in the background, e.g. 'Start-Job' or start a server with Start-Process.
+      - id: tool-fs
+        name: '@deepseek-ai/dsh-tool-fs'
+      - id: tool-fs-search
+        name: '@deepseek-ai/dsh-tool-fs-search'
+        config:
+          sampleOverCapGlobResults: false
+      - id: tool-jobs
+        name: '@deepseek-ai/dsh-tool-jobs'
+      - id: skill-filesystem
+        name: '@deepseek-ai/dsh-skill-filesystem'
+      - id: tool-skill
+        name: '@deepseek-ai/dsh-tool-skill'
+      - id: command-goal
+        name: '@deepseek-ai/dsh-command-goal'
+      - id: tool-goal
+        name: '@deepseek-ai/dsh-tool-goal'
+      - id: planning
+        name: cordis:group
+        group: true
+        isolate:
+          planMode: true
+        config:
+          - id: plan-mode
+            name: '@deepseek-ai/dsh-plan-mode'
+            config:
+              section: |
+                You are in plan mode. Stay in plan mode until exit_plan_mode succeeds or the user switches the session mode. Imperative language to implement changes means plan the implementation, not execute it. A user's conversational agreement — including an answer confirming something you asked — approves nothing and does not end plan mode; fold the confirmed decision into the plan and submit it through exit_plan_mode.
+
+                Explore first. Use non-mutating reads, searches, static analysis, and checks to ground the plan in the actual repository. Do not edit or write files, change configuration, run formatters or code generation that rewrites tracked files, commit, or otherwise carry out the plan. Prefer existing functions and patterns over new machinery.
+
+                The tool catalog stays the same across modes for request-cache stability. These plan-mode rules override any later tool description or guidance that suggests using mutation tools; those tools remain listed to keep the tool catalog unchanged. Do not use todo_write to track this planning phase: it tracks implementation after an approved plan, while the plan itself belongs in exit_plan_mode.
+
+                Resolve discoverable facts by inspection. Use ask_user_question only for user-owned choices or material ambiguity that inspection cannot answer. Do not ask the user where code lives or how current behavior works when you can find out.
+
+                Make the plan decision-complete: state the goal and success criteria; group implementation changes by subsystem; identify public API, schema, and data-flow changes; cover edge cases, failure modes, tests, acceptance criteria, and explicit assumptions. Keep it concise enough to review but detailed enough that another engineer can implement it without making design decisions.
+
+                When ready, call exit_plan_mode with the complete plan markdown, starting with a # title. Make exit_plan_mode the only and final tool call in that assistant response: it presents the plan for approval, and implementation begins only in a later step after approval. Do not paste the final plan as a plain reply or ask "should I proceed?" through prose or ask_user_question. If review rejects it, incorporate the feedback and present again. If the review channel is unavailable or aborted, stay in plan mode and ask the user to switch modes manually; do not proceed with implementation.
+      - id: compaction
+        name: cordis:group
+        group: true
+        isolate:
+          compaction: true
+          toolResultPruner: true
+        config:
+          - id: compaction-basic
+            name: '@deepseek-ai/dsh-compaction-basic'
+          - id: command-compact
+            name: '@deepseek-ai/dsh-command-compact'
+          - id: tool-result-pruner
+            name: '@deepseek-ai/dsh-compaction-tool-result-pruner'
+            config:
+              thresholdChars: 8192
+              headChars: 4096
+              tailChars: 1024
+      - id: delegation
+        name: cordis:group
+        group: true
+        isolate:
+          workflowEngine: true
+        config:
+          - id: tool-subagent-control
+            name: '@deepseek-ai/dsh-tool-subagent-control'
+          - id: tool-subagent-list-agents
+            name: '@deepseek-ai/dsh-tool-subagent-control/list-agents'
+          - id: tool-subagent
+            name: '@deepseek-ai/dsh-tool-subagent'
+            config:
+              provider: spawn
+              toolName: subagent
+              modelSelectionSettings: true
+              backgroundMode: continuable
+          - id: tool-subagent-fork
+            name: '@deepseek-ai/dsh-tool-subagent'
+            config:
+              provider: fork
+              toolName: subagent_fork
+              backgroundMode: continuable
+          - id: tool-subagent-codex
+            name: '@deepseek-ai/dsh-tool-subagent'
+            disabled: true
+            config:
+              provider: codex
+              toolName: subagent_codex
+              backgroundMode: one-shot
+              maxDepth: provider-managed
+          - id: tool-subagent-claude-code
+            name: '@deepseek-ai/dsh-tool-subagent'
+            disabled: true
+            config:
+              provider: claude-code
+              toolName: subagent_claude_code
+              backgroundMode: one-shot
+              maxDepth: provider-managed
+          - id: workflow-ptc
+            name: '@deepseek-ai/dsh-workflow-ptc'
+            config:
+              provider: spawn
+          - id: tool-workflow
+            name: '@deepseek-ai/dsh-tool-workflow'
+          - id: tool-ralph
+            name: '@deepseek-ai/dsh-tool-ralph'
+            disabled: true
+            config:
+              subagentProvider: spawn
+              maxRounds: 64
+      - id: tool-ask-user
+        name: '@deepseek-ai/dsh-tool-ask-user'
+      - id: tool-todo
+        name: '@deepseek-ai/dsh-tool-todo'
+        config:
+          allowParallelInProgress: true
+      - id: tool-web
+        name: '@deepseek-ai/dsh-tool-web'
+        config:
+          fetch: true
+          searchTimeoutMs: 60000
+      - id: present
+        name: '@deepseek-ai/dsh-tool-present'
+      - id: tool-plugin-manager
+        name: '@deepseek-ai/dsh-plugin-manager/tools'
+        disabled: true
